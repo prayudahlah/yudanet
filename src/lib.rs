@@ -1,1 +1,2 @@
-pub mod tensor;
+mod tensor;
+pub use tensor::Tensor;

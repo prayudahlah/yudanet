@@ -1,4 +1,4 @@
-use yuda_learn::tensor::Tensor;
+use yuda_learn::Tensor;
 
 fn divider() {
     println!("\n{}", "-".repeat(30));
