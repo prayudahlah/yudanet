@@ -1,7 +1,7 @@
 use crate::Tensor;
 
 impl Tensor {
-    fn reduce<F>(&self, init: f32, f: F) -> f32
+    fn apply_reduce<F>(&self, init: f32, f: F) -> f32
     where
         F: Fn(f32, f32) -> f32,
     {
@@ -14,10 +14,14 @@ impl Tensor {
         acc
     }
 
-    fn reduce_axis<F>(&self, axis: usize, init: f32, f: F) -> Option<Self>
+    fn apply_reduce_axis<F>(&self, axis: usize, init: f32, f: F) -> Result<Self, String>
     where
         F: Fn(f32, f32) -> f32,
     {
+        if axis >= self.ndim() {
+            return Err("Axis out of bounds".to_string());
+        }
+
         let shape: Vec<usize> = self
             .shape()
             .iter()
@@ -50,50 +54,47 @@ impl Tensor {
             data[idx] = acc;
         }
 
-        Some(Self::new(data, shape))
+        Ok(Self::new(data, shape))
     }
 
     pub fn sum(&self) -> f32 {
-        self.reduce(0.0, |a, b| a + b)
+        self.apply_reduce(0.0, |a, b| a + b)
     }
 
-    pub fn sum_axis(&self, axis: usize) -> Option<Tensor> {
-        self.reduce_axis(axis, 0.0, |a, b| a + b)
+    pub fn sum_axis(&self, axis: usize) -> Result<Tensor, String> {
+        self.apply_reduce_axis(axis, 0.0, |a, b| a + b)
     }
 
     pub fn product(&self) -> f32 {
-        self.reduce(1.0, |a, b| a * b)
+        self.apply_reduce(1.0, |a, b| a * b)
     }
 
-    pub fn product_axis(&self, axis: usize) -> Option<Tensor> {
-        self.reduce_axis(axis, 1.0, |a, b| a * b)
+    pub fn product_axis(&self, axis: usize) -> Result<Tensor, String> {
+        self.apply_reduce_axis(axis, 1.0, |a, b| a * b)
     }
 
     pub fn mean(&self) -> f32 {
         self.sum() / self.len() as f32
     }
 
-    pub fn mean_axis(&self, axis: usize) -> Option<Tensor> {
-        if let Some(t) = self.sum_axis(axis) {
-            Some(t.div_scalar(self.shape()[axis] as f32))
-        } else {
-            None
-        }
+    pub fn mean_axis(&self, axis: usize) -> Result<Tensor, String> {
+        let sum = self.sum_axis(axis)?;
+        Ok(sum.div_scalar(self.shape()[axis] as f32))
     }
 
     pub fn max(&self) -> f32 {
-        self.reduce(f32::NEG_INFINITY, |a, b| a.max(b))
+        self.apply_reduce(f32::NEG_INFINITY, |a, b| a.max(b))
     }
 
-    pub fn max_axis(&self, axis: usize) -> Option<Tensor> {
-        self.reduce_axis(axis, f32::NEG_INFINITY, |a, b| a.max(b))
+    pub fn max_axis(&self, axis: usize) -> Result<Tensor, String> {
+        self.apply_reduce_axis(axis, f32::NEG_INFINITY, |a, b| a.max(b))
     }
 
     pub fn min(&self) -> f32 {
-        self.reduce(f32::INFINITY, |a, b| a.min(b))
+        self.apply_reduce(f32::INFINITY, |a, b| a.min(b))
     }
 
-    pub fn min_axis(&self, axis: usize) -> Option<Tensor> {
-        self.reduce_axis(axis, f32::INFINITY, |a, b| a.min(b))
+    pub fn min_axis(&self, axis: usize) -> Result<Tensor, String> {
+        self.apply_reduce_axis(axis, f32::INFINITY, |a, b| a.min(b))
     }
 }
