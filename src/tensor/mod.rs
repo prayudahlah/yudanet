@@ -5,6 +5,7 @@ mod display;
 mod getter;
 mod iter;
 mod ops;
+mod serialization;
 mod tests;
 mod util;
 

@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "yuda-learn"
+name = "yudanet"
 version = "0.1.0"
