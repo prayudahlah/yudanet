@@ -5,6 +5,21 @@ impl Tensor {
         self.offset == 0 && self.data().len() == self.shape.iter().product()
     }
 
+    pub fn to_contiguous(&self) -> Tensor {
+        if self.is_contiguous() {
+            Self {
+                data: self.data.clone(),
+                shape: self.shape.clone(),
+                strides: self.strides.clone(),
+                offset: self.offset,
+            }
+        } else {
+            let data: Vec<f32> = self.iter().collect();
+
+            Self::new(data, self.shape.clone())
+        }
+    }
+
     pub(crate) fn compute_strides(shape: &[usize]) -> Vec<usize> {
         let mut strides: Vec<usize> = vec![1; shape.len()];
 
