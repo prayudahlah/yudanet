@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://media.tenor.com/Ok8kj4G5YRcAAAAe/dsmp.png" style="height: 200px;">
+</p>
+
 Deep learning library from scratch in Rust.
 
 Built entirely from the ground up as a learning exercise.
