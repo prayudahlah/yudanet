@@ -61,3 +61,89 @@ impl Tensor {
         self.apply_unary(|x| x / scalar)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_relu_neg() {
+        let t = Tensor::new(vec![-2.0, -1.0, 0.0, 1.0, 2.0], vec![5]);
+        let r = t.relu();
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![0.0, 0.0, 0.0, 1.0, 2.0]);
+    }
+
+    #[test]
+    fn test_relu_strided() {
+        let t = Tensor::new(vec![-2.0, 1.0, -3.0, 4.0], vec![2, 2]);
+        let s = t.slice(&[0..2, 0..1]);
+        let r = s.relu();
+        // slice of first column: [[-2], [-3]] → relu → [[0], [0]]
+        assert_eq!(r.get_unchecked(&[0, 0]), 0.0);
+        assert_eq!(r.get_unchecked(&[1, 0]), 0.0);
+    }
+
+    #[test]
+    fn test_neg() {
+        let t = Tensor::new(vec![1.0, -2.0, 3.0], vec![3]);
+        let r = t.neg();
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![-1.0, 2.0, -3.0]);
+    }
+
+    #[test]
+    fn test_exp() {
+        let t = Tensor::new(vec![0.0, 1.0], vec![2]);
+        let r = t.exp();
+        assert!((r.get_unchecked(&[0]) - 1.0).abs() < 1e-5);
+        assert!((r.get_unchecked(&[1]) - std::f32::consts::E).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_log() {
+        let t = Tensor::new(vec![1.0, std::f32::consts::E], vec![2]);
+        let r = t.log();
+        assert!((r.get_unchecked(&[0]) - 0.0).abs() < 1e-5);
+        assert!((r.get_unchecked(&[1]) - 1.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_sigmoid() {
+        let t = Tensor::new(vec![0.0, 100.0], vec![2]);
+        let r = t.sigmoid();
+        assert!((r.get_unchecked(&[0]) - 0.5).abs() < 1e-5);
+        assert!((r.get_unchecked(&[1]) - 1.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_tanh() {
+        let t = Tensor::new(vec![0.0], vec![1]);
+        let r = t.tanh();
+        assert!((r.get_unchecked(&[0]) - 0.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_add_scalar() {
+        let t = Tensor::new(vec![1.0, 2.0], vec![2]);
+        let r = t.add_scalar(10.0);
+        assert_eq!(r.get_unchecked(&[0]), 11.0);
+        assert_eq!(r.get_unchecked(&[1]), 12.0);
+    }
+
+    #[test]
+    fn test_mult_scalar() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0], vec![3]);
+        let r = t.mult_scalar(3.0);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![3.0, 6.0, 9.0]);
+    }
+
+    #[test]
+    fn test_div_scalar() {
+        let t = Tensor::new(vec![2.0, 4.0, 6.0], vec![3]);
+        let r = t.div_scalar(2.0);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![1.0, 2.0, 3.0]);
+    }
+}

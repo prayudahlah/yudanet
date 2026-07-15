@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+
+[dev-dependencies]
+
+criterion = { version = "0.8.2", features = ["html_reports"] }
+
+[[bench]]
+name = "matmul_bench"
+harness = false

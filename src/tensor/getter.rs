@@ -82,3 +82,45 @@ impl Tensor {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_get_valid() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        assert_eq!(t.get(&[0, 0]), Some(1.0));
+        assert_eq!(t.get(&[1, 1]), Some(4.0));
+    }
+
+    #[test]
+    fn test_get_out_of_bounds() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        assert_eq!(t.get(&[2, 0]), None);
+        assert_eq!(t.get(&[0, 2]), None);
+    }
+
+    #[test]
+    fn test_get_unchecked() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        assert_eq!(t.get_unchecked(&[0, 0]), 1.0);
+        assert_eq!(t.get_unchecked(&[1, 1]), 4.0);
+    }
+
+    #[test]
+    fn test_slice_shape() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let s = t.slice(&[0..2, 1..3]);
+        assert_eq!(s.shape(), &[2, 2]);
+        assert_eq!(s.offset(), 1);
+    }
+
+    #[test]
+    fn test_slice_value() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let s = t.slice(&[1..2, 0..2]);
+        assert_eq!(s.get_unchecked(&[0, 0]), 4.0);
+        assert_eq!(s.get_unchecked(&[0, 1]), 5.0);
+    }
+}

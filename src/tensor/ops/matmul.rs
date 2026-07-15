@@ -32,3 +32,40 @@ impl Tensor {
         Ok(Self::new(matmul_data, matmul_shape))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_matmul_2x3_3x2() {
+        let a = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let b = Tensor::new(vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0], vec![3, 2]);
+        let c = a.matmul(&b).unwrap();
+        assert_eq!(c.shape(), &[2, 2]);
+        let vals: Vec<f32> = c.iter().collect();
+        assert_eq!(vals, vec![58.0, 64.0, 139.0, 154.0]);
+    }
+
+    #[test]
+    fn test_matmul_1x1() {
+        let a = Tensor::new(vec![3.0], vec![1, 1]);
+        let b = Tensor::new(vec![4.0], vec![1, 1]);
+        let c = a.matmul(&b).unwrap();
+        assert_eq!(c.get_unchecked(&[0, 0]), 12.0);
+    }
+
+    #[test]
+    fn test_matmul_not_2d() {
+        let a = Tensor::ones(vec![2, 2, 2]);
+        let b = Tensor::ones(vec![2, 2]);
+        assert!(a.matmul(&b).is_err());
+    }
+
+    #[test]
+    fn test_matmul_inner_dim_mismatch() {
+        let a = Tensor::ones(vec![2, 3]);
+        let b = Tensor::ones(vec![4, 5]);
+        assert!(a.matmul(&b).is_err());
+    }
+}
