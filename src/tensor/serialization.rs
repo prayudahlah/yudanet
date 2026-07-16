@@ -66,3 +66,47 @@ impl Tensor {
         Ok(Self::new(data, shape))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_save_load_roundtrip() {
+        let path = "/tmp/test_roundtrip.yn";
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        t.save(path).unwrap();
+        let loaded = Tensor::load(path).unwrap();
+        assert_eq!(loaded.shape(), &[2, 3]);
+        let orig: Vec<f32> = t.iter().collect();
+        let loaded_vals: Vec<f32> = loaded.iter().collect();
+        assert_eq!(orig, loaded_vals);
+        std::fs::remove_file(path).ok();
+    }
+
+    #[test]
+    fn test_save_load_strided() {
+        let path = "/tmp/test_strided.yn";
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let s = t.slice(&[0..2, 0..1]);
+        s.save(path).unwrap();
+        let loaded = Tensor::load(path).unwrap();
+        assert_eq!(loaded.shape(), &[2, 1]);
+        let orig: Vec<f32> = t.slice(&[0..2, 0..1]).iter().collect();
+        let loaded_vals: Vec<f32> = loaded.iter().collect();
+        assert_eq!(orig, loaded_vals);
+        std::fs::remove_file(path).ok();
+    }
+
+    #[test]
+    fn test_load_invalid_magic() {
+        use std::io::Write;
+        let path = "/tmp/test_bad_magic.yn";
+        let mut f = std::fs::File::create(path).unwrap();
+        f.write_all(b"BAD\0\0\0\0\0").unwrap();
+        f.write_all(&[1u8; 4]).unwrap();
+        drop(f);
+        assert!(Tensor::load(path).is_err());
+        std::fs::remove_file(path).ok();
+    }
+}

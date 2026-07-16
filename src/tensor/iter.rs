@@ -35,3 +35,33 @@ impl<'a> Iterator for Iter<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_iter_count() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let collected: Vec<f32> = t.iter().collect();
+        assert_eq!(collected, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    }
+
+    #[test]
+    fn test_iter_strided() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let s = t.slice(&[0..2, 0..1]);
+        let collected: Vec<f32> = s.iter().collect();
+        assert_eq!(collected, vec![1.0, 4.0]);
+    }
+
+    #[test]
+    fn test_iter_empty_after_end() {
+        let t = Tensor::ones(vec![3]);
+        let mut iter = t.iter();
+        assert!(iter.next().is_some());
+        assert!(iter.next().is_some());
+        assert!(iter.next().is_some());
+        assert!(iter.next().is_none());
+    }
+}

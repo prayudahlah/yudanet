@@ -15,7 +15,7 @@ Work in progress.
 | Level | Component | Status |
 |:-----:|-----------|:------:|
 | 0 | Tensor Engine: shape, strides, indexing, slicing, unary/binary ops, broadcasting, reduction, matmul, view ops, serialization | [✓] |
-| 1 | Compute Optimizations: tiling, SIMD, multithreading, operator fusion | [⠀] |
+| 1 | Compute Optimizations: tiling, SIMD, multithreading, operator fusion | [✓] |
 | 2 | Autograd: computation graph, backpropagation, gradient checking | [⠀] |
 | 3 | NN Layers: Linear, activations, Conv2D, BatchNorm, Dropout, loss functions | [⠀] |
 | 4 | Optimizers & Training: SGD, Adam, DataLoader, training loop, checkpointing | [⠀] |

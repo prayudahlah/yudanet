@@ -72,3 +72,68 @@ impl Tensor {
         flat_index
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_compute_strides() {
+        assert_eq!(Tensor::compute_strides(&[2, 3]), vec![3, 1]);
+        assert_eq!(Tensor::compute_strides(&[2, 3, 4]), vec![12, 4, 1]);
+        assert_eq!(Tensor::compute_strides(&[5]), vec![1]);
+    }
+
+    #[test]
+    fn test_is_contiguous() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        assert!(t.is_contiguous());
+    }
+
+    #[test]
+    fn test_is_not_contiguous_after_slice() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let s = t.slice(&[0..2, 0..1]);
+        assert!(!s.is_contiguous());
+    }
+
+    #[test]
+    fn test_to_contiguous() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]);
+        let s = t.slice(&[0..2, 0..1]);
+        let c = s.to_contiguous();
+        assert!(c.is_contiguous());
+        assert_eq!(c.shape(), &[2, 1]);
+        assert_eq!(c.strides(), &[1, 1]);
+    }
+
+    #[test]
+    fn test_update_indices_from_index() {
+        let mut indices = vec![0, 0, 0];
+        Tensor::update_indices_from_index(&mut indices, 10, &[2, 3, 4]);
+        // 10 = 0*12 + 2*4 + 2*1 → (0, 2, 2)
+        assert_eq!(indices, vec![0, 2, 2]);
+
+        let mut indices = vec![0, 0];
+        Tensor::update_indices_from_index(&mut indices, 5, &[2, 3]);
+        // 5 = 1*3 + 2*1 → (1, 2)
+        assert_eq!(indices, vec![1, 2]);
+    }
+
+    #[test]
+    fn test_flat_index() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        assert_eq!(t.flat_index(&[0, 0]), Some(0));
+        assert_eq!(t.flat_index(&[1, 0]), Some(2));
+        assert_eq!(t.flat_index(&[1, 1]), Some(3));
+    }
+
+    #[test]
+    fn test_flat_index_out_of_bounds() {
+        let t = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        assert_eq!(t.flat_index(&[2, 0]), None);
+        assert_eq!(t.flat_index(&[0, 2]), None);
+        assert_eq!(t.flat_index(&[0]), None);
+        assert_eq!(t.flat_index(&[0, 0, 0]), None);
+    }
+}

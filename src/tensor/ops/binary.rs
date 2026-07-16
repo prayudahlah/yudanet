@@ -62,3 +62,72 @@ impl Tensor {
         self.apply_binary(other, |a, b| a / b)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Tensor;
+
+    #[test]
+    fn test_add_same_shape() {
+        let a = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        let b = Tensor::new(vec![5.0, 6.0, 7.0, 8.0], vec![2, 2]);
+        let r = a.add(&b);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![6.0, 8.0, 10.0, 12.0]);
+    }
+
+    #[test]
+    fn test_sub_same_shape() {
+        let a = Tensor::new(vec![5.0, 6.0, 7.0, 8.0], vec![2, 2]);
+        let b = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        let r = a.sub(&b);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![4.0, 4.0, 4.0, 4.0]);
+    }
+
+    #[test]
+    fn test_mul_same_shape() {
+        let a = Tensor::new(vec![2.0, 3.0], vec![2]);
+        let b = Tensor::new(vec![4.0, 5.0], vec![2]);
+        let r = a.mul(&b);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![8.0, 15.0]);
+    }
+
+    #[test]
+    fn test_div_same_shape() {
+        let a = Tensor::new(vec![10.0, 20.0, 30.0], vec![3]);
+        let b = Tensor::new(vec![2.0, 4.0, 5.0], vec![3]);
+        let r = a.div(&b);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![5.0, 5.0, 6.0]);
+    }
+
+    #[test]
+    fn test_broadcast_scalar() {
+        let a = Tensor::new(vec![1.0, 2.0, 3.0], vec![3]);
+        let b = Tensor::new(vec![10.0], vec![1]);
+        let r = a.add(&b);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![11.0, 12.0, 13.0]);
+    }
+
+    #[test]
+    fn test_broadcast_2d_scalar() {
+        let a = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        let b = Tensor::new(vec![10.0], vec![1]);
+        let r = a.mul(&b);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![10.0, 20.0, 30.0, 40.0]);
+    }
+
+    #[test]
+    fn test_broadcast_1d_to_2d() {
+        let a = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![2, 2]);
+        let b = Tensor::new(vec![10.0, 20.0], vec![2]);
+        let r = a.add(&b);
+        assert_eq!(r.shape(), &[2, 2]);
+        let vals: Vec<f32> = r.iter().collect();
+        assert_eq!(vals, vec![11.0, 22.0, 13.0, 24.0]);
+    }
+}
